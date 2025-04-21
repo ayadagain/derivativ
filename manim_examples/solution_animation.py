@@ -1,11 +1,17 @@
 import random
 # Removed numpy import
 from manim import (
-    Scene, MathTex, Tex, Write, Transform, VGroup, FadeOut, UP, DOWN, LEFT, RIGHT, # Changed back to Scene
-    AnimationGroup, Create, Line, Dot, DashedLine, Square, BraceBetweenPoints, # Added back 2D specifics
-    ORIGIN, YELLOW, GREEN # Removed 3D specifics like DEGREES, OUT, IN, BLUE, WHITE, RED
+    # Scene, # Replaced by VoiceoverScene
+    MathTex, Tex, Write, Transform, VGroup, FadeOut, UP, DOWN, LEFT, RIGHT,
+    AnimationGroup, Create, Line, Dot, DashedLine, Square, BraceBetweenPoints,
+    ORIGIN, YELLOW, GREEN
+    # Removed 3D specifics like DEGREES, OUT, IN, BLUE, WHITE, RED
     # Removed Polyhedron, Polygon, Line3D, Dot3D, Text
 )
+# Added Voiceover imports
+from manim_voiceover import VoiceoverScene
+from manim_voiceover.services.gtts import GTTSService
+
 import math
 
 # Helper function to create the VMN triangle diagram - RESTORED
@@ -43,8 +49,12 @@ def create_vmn_triangle(vm_len, mn_len, vn_len):
     
     return VGroup(triangle, dimensions)
 
-class WorkedExamplePyramid(Scene): # Changed back to Scene
+
+class WorkedExamplePyramid(VoiceoverScene): # Changed base class to VoiceoverScene
     def construct(self):
+        # Set the speech service (requires internet connection)
+        self.set_speech_service(GTTSService())
+
         # Removed set_camera_orientation
 
         # --- Problem Setup with Random Integers ---
@@ -79,32 +89,36 @@ class WorkedExamplePyramid(Scene): # Changed back to Scene
                    .to_edge(LEFT, buff=1.0)
                    )
         
-        # --- Display Problem Text and Diagram First ---
-        self.play(Write(problem_text))
-        self.play(Create(diagram))
-        self.wait(2)
+        # --- Display Problem Text and Diagram First (with voiceover) ---
+        with self.voiceover(text="Let's look at the problem description.") as tracker:
+            self.play(Write(problem_text), run_time=tracker.duration)
+        
+        with self.voiceover(text="Here is a diagram of the right-angled triangle V M N.") as tracker:
+            self.play(Create(diagram), run_time=tracker.duration)
+        # self.wait(2) # Replaced by voiceover timing
 
         # --- Define Steps Data (Simplified) ---
         # Adjusted variable names and scale for 2D
+        # Added voiceover text string for each step
         steps_data = [
-            (Tex, f"Height VM = {vm_height}", 0.5, None),
-            (Tex, f"Base MN = {mn_base:.1f}", 0.5, None),
-            (Tex, f"Triangle VMN is right-angled at M.", 0.5, None),
-            (MathTex, f"VN^2 = VM^2 + MN^2", 0.5, None),
-            (MathTex, f"VN^2 = ({vm_height})^2 + ({mn_base:.1f})^2", 0.5, None),
-            (MathTex, f"VN^2 = {vm_height**2} + {mn_base**2:.2f}", 0.5, None),
-            (MathTex, f"VN^2 = {vn_hyp_sq:.2f}", 0.5, None),
-            (MathTex, f"VN = \\sqrt{{ {vn_hyp_sq:.2f} }} \\approx {vn_hyp:.2f}", 0.5, None),
-            (Tex, f"Hypotenuse VN $\\approx$ {vn_hyp:.2f} cm", 0.8, GREEN)
+            (Tex, f"Height VM = {vm_height}", 0.5, None, f"The height V M is {vm_height}."),
+            (Tex, f"Base MN = {mn_base:.1f}", 0.5, None, f"The base M N is {mn_base:.1f}."),
+            (Tex, f"Triangle VMN is right-angled at M.", 0.5, None, "The triangle V M N is right-angled at M."),
+            (MathTex, f"VN^2 = VM^2 + MN^2", 0.5, None, "By the Pythagorean Theorem, V N squared equals V M squared plus M N squared."),
+            (MathTex, f"VN^2 = ({vm_height})^2 + ({mn_base:.1f})^2", 0.5, None, f"Substituting the values, V N squared equals {vm_height} squared plus {mn_base:.1f} squared."),
+            (MathTex, f"VN^2 = {vm_height**2} + {mn_base**2:.2f}", 0.5, None, f"Calculating the squares, we get {vm_height**2} plus {mn_base**2:.2f}."),
+            (MathTex, f"VN^2 = {vn_hyp_sq:.2f}", 0.5, None, f"So, V N squared equals {vn_hyp_sq:.2f}."),
+            (MathTex, f"VN = \\sqrt{{ {vn_hyp_sq:.2f} }} \\approx {vn_hyp:.2f}", 0.5, None, f"Taking the square root, V N is approximately {vn_hyp:.2f}."),
+            (Tex, f"Hypotenuse VN $\\approx$ {vn_hyp:.2f} cm", 0.8, GREEN, f"Therefore, the hypotenuse V N is approximately {vn_hyp:.2f} centimeters.")
         ]
 
         steps_mobs = VGroup() # Group to hold all displayed steps
 
-        # --- Position and Animate Calculation Steps (Reverted to 2D) ---
+        # --- Position and Animate Calculation Steps (Reverted to 2D, with voiceover) ---
         # Reposition relative to the diagram's top-right corner
         anchor_point = diagram.get_corner(UP + RIGHT) + RIGHT * 0.8
 
-        for i, (MobClass, text, scale_val, color) in enumerate(steps_data):
+        for i, (MobClass, text, scale_val, color, vo_text) in enumerate(steps_data):
             step_mob = MobClass(text).scale(scale_val)
             if color:
                 step_mob.set_color(color)
@@ -117,8 +131,13 @@ class WorkedExamplePyramid(Scene): # Changed back to Scene
             
             # Removed add_fixed_in_frame_mobjects
             steps_mobs.add(step_mob)
-            self.play(Write(step_mob), run_time=0.8)
-            self.wait(0.8)
+            
+            # Add voiceover for each step
+            with self.voiceover(text=vo_text) as tracker:
+                self.play(Write(step_mob), run_time=max(tracker.duration, 0.5)) # Ensure minimum runtime
+            # self.wait(0.8) # Replaced by voiceover timing
 
         # Removed move_camera
-        self.wait(3) # Final pause 
+        with self.voiceover(text="The calculation is complete.") as tracker:
+            self.wait(tracker.duration)
+        # self.wait(3) # Final pause 
