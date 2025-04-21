@@ -40,28 +40,7 @@ class BinomialToPoissonConvergence(Scene):
             except (ValueError, OverflowError):  # Handle potential math domain errors
                 return 0  # Or very small number
 
-        # --- Axis Setup ---
-        axes = Axes(
-            x_range=[0, x_range_max + 1, 1],  # Increased range by 1 to show full x-axis
-            y_range=[0, y_range_max, 0.05],
-            x_length=10,
-            y_length=5,
-            axis_config={"include_numbers": True, "decimal_number_config": {"num_decimal_places": 2}},
-            x_axis_config={"numbers_to_include": np.arange(0, x_range_max + 1, 3)},
-            y_axis_config={"include_numbers": True, "numbers_to_include": np.arange(0, y_range_max, 0.05)},
-            tips=False,
-        ).to_edge(DOWN, buff=1)
-        
-        x_label = axes.get_x_axis_label("k", edge=DOWN, direction=DOWN)
-        y_label = axes.get_y_axis_label("P(X=k)", edge=LEFT, direction=LEFT)
-        # Shift the y-label further left to avoid overlap with axis numbers
-        y_label.shift(LEFT * 0.7)  # Increased shift for better visibility
-        axes_labels = VGroup(x_label, y_label)
-
-        self.play(Create(axes), Create(axes_labels))
-        self.wait(0.5)
-
-        # --- Title ---
+        # --- Title and Labels ---
         title = Tex("Binomial Convergence to Poisson", font_size=48).to_edge(UP)
         self.play(Write(title))
 
@@ -126,28 +105,22 @@ class BinomialToPoissonConvergence(Scene):
             new_chart = BarChart(
                 values=all_binomial_probs[i],
                 y_range=[0, y_range_max, 0.05],
-                x_length=axes.x_length,
-                y_length=axes.y_length,
+                x_length=10,
+                y_length=5,
                 bar_width=0.5,  # Adjusted for better visibility
                 bar_fill_opacity=0.8,  # Increased opacity
                 bar_colors=[get_bar_colors(i)],  # Custom color based on n index
-                x_axis_config={"include_numbers": False},  # Hide x-axis numbers since we're using the main axes
-                y_axis_config={"include_numbers": False},  # Hide y-axis numbers since we're using the main axes
-            )
+                axis_config={"include_numbers": True, "decimal_number_config": {"num_decimal_places": 2}},
+                x_axis_config={"numbers_to_include": np.arange(0, x_range_max + 1, 3)},
+                y_axis_config={"numbers_to_include": np.arange(0, y_range_max, 0.05)},
+                tips=False,
+            ).to_edge(DOWN, buff=1)
             
-            # Align the chart with the axes origin
-            origin_point = axes.c2p(0, 0)
-            new_chart.move_to(origin_point, aligned_edge=LEFT+DOWN)
-            # Fine-tune alignment
-            new_chart.shift(RIGHT * 0.25)  # Adjust horizontal position
+            # No need to align with axes since the chart is its own axes
             
             # Create n and p value text Mobjects
             new_n_val_tex = MathTex(str(n), font_size=36).next_to(n_label_static, RIGHT, buff=0.1)
             new_p_val_tex = MathTex(f"{p:.3f}", font_size=36).next_to(p_label_static, RIGHT, buff=0.1)
-
-            # Align dynamic values vertically with their static labels
-            new_n_val_tex.align_to(n_label_static, DOWN)
-            new_p_val_tex.align_to(p_label_static, DOWN)
 
             if current_chart is None:  # First iteration
                 # Create and fade in the first chart and its n/p values
@@ -175,37 +148,36 @@ class BinomialToPoissonConvergence(Scene):
         poisson_chart = BarChart(
             values=poisson_probs_clipped,
             y_range=[0, y_range_max, 0.05],
-            x_length=axes.x_length,
-            y_length=axes.y_length,
+            x_length=10,
+            y_length=5,
             bar_width=0.5,  # Consistent with other charts
             bar_fill_opacity=0.8,
             bar_colors=[YELLOW],
-            x_axis_config={"include_numbers": False},  # Hide x-axis numbers since we're using the main axes
-            y_axis_config={"include_numbers": False},  # Hide y-axis numbers since we're using the main axes
-        )
-        
-        # Align the Poisson chart with the axes
-        origin_point = axes.c2p(0, 0)
-        poisson_chart.move_to(origin_point, aligned_edge=LEFT+DOWN)
-        poisson_chart.shift(RIGHT * 0.25)  # Match the binomial chart adjustment
+            axis_config={"include_numbers": True, "decimal_number_config": {"num_decimal_places": 2}},
+            x_axis_config={"numbers_to_include": np.arange(0, x_range_max + 1, 3)},
+            y_axis_config={"numbers_to_include": np.arange(0, y_range_max, 0.05)},
+            tips=False,
+        ).to_edge(DOWN, buff=1)
 
         # Create and position the Poisson distribution label
-        poisson_dist_label = MathTex(rf"\text{{Poisson}}(\lambda={lambda_val})", font_size=36)
-        poisson_dist_label.next_to(static_labels, DOWN, buff=0.4)
+        poisson_dist_label = MathTex(rf"\text{{Poisson}}", font_size=36)
+        poisson_dist_label.next_to(title, DOWN, buff=0.6)
 
-        # Final animation to show the Poisson distribution
+        # Create conclusion text
+        conclusion_text = Tex("As $n \\to \\infty$ and $p \\to 0$ with $np = \\lambda$ constant,\\\\",
+                            "the Binomial distribution converges to Poisson",
+                            font_size=32)
+        conclusion_text.next_to(poisson_dist_label, DOWN, buff=0.4)
+
+        # Final animation sequence
         self.play(
             ReplacementTransform(current_chart, poisson_chart),
             FadeOut(VGroup(n_label_static, current_n_val_tex, p_label_static, current_p_val_tex)),
             FadeIn(poisson_dist_label),
             run_time=animation_run_time * 1.5  # Slightly longer for emphasis
         )
-
-        # Add a conclusion text
-        conclusion_text = Tex("As $n \\to \\infty$ and $p \\to 0$ with $np = \\lambda$ constant,\\\\",
-                            "the Binomial distribution converges to Poisson",
-                            font_size=32)
-        conclusion_text.next_to(poisson_dist_label, DOWN, buff=0.5)
+        
+        # Add explanation after the chart transition
+        self.wait(0.5)
         self.play(Write(conclusion_text), run_time=2)
-
-        self.wait(3)
+        self.wait(1)
