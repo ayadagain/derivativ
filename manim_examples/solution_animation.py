@@ -41,7 +41,7 @@ def create_vmn_triangle(vm_len, mn_len, vn_len):
     brace_vm = BraceBetweenPoints(V, M, direction=LEFT)
     label_vm = brace_vm.get_tex(f"{vm_len}").scale(0.8)
     brace_mn = BraceBetweenPoints(M, N, direction=DOWN)
-    label_mn = brace_mn.get_tex(f"{mn_len:.1f}").scale(0.8)
+    label_mn = brace_mn.get_tex(f"{int(mn_len) if mn_len.is_integer() else mn_len:.1f}").scale(0.8)
     # label_vn = MathTex(f"{vn_len:.2f}").move_to(Line(V,N).get_center()).shift(UP*0.3 + RIGHT*0.3).scale(0.8)
 
     triangle = VGroup(vm_line, mn_line, vn_line, dot_M, dot_N, dot_V, label_M, label_N, label_V, right_angle)
@@ -50,7 +50,7 @@ def create_vmn_triangle(vm_len, mn_len, vn_len):
     return VGroup(triangle, dimensions)
 
 
-class WorkedExamplePyramid(VoiceoverScene): # Changed base class to VoiceoverScene
+class WorkedExampleTriangle(VoiceoverScene): # Changed base class to VoiceoverScene
     def construct(self):
         # Set the speech service (requires internet connection)
         self.set_speech_service(GTTSService())
@@ -69,7 +69,7 @@ class WorkedExamplePyramid(VoiceoverScene): # Changed base class to VoiceoverSce
         problem_string = f"""\\begin{{minipage}}{{12cm}}
 \\raggedright Consider the right-angled triangle VMN, where the right angle is at M. \\\\
  The length of the vertical side VM is {vm_height} cm. \\\\
- The length of the horizontal base MN is {mn_base:.1f} cm. \\\\
+ The length of the horizontal base MN is {int(mn_base) if mn_base.is_integer() else mn_base:.1f} cm. \\\\
  i) Use the Pythagorean Theorem to find the length of the hypotenuse VN.
 \\end{{minipage}}"""
         
@@ -102,13 +102,13 @@ class WorkedExamplePyramid(VoiceoverScene): # Changed base class to VoiceoverSce
         # Added voiceover text string for each step
         steps_data = [
             (Tex, f"Height VM = {vm_height}", 0.5, None, f"The height V M is {vm_height}."),
-            (Tex, f"Base MN = {mn_base:.1f}", 0.5, None, f"The base M N is {mn_base:.1f}."),
+            (Tex, f"Base MN = {int(mn_base) if mn_base.is_integer() else mn_base:.1f}", 0.5, None, f"The base M N is {int(mn_base) if mn_base.is_integer() else mn_base:.1f}."),
             (Tex, f"Triangle VMN is right-angled at M.", 0.5, None, "The triangle V M N is right-angled at M."),
             (MathTex, f"VN^2 = VM^2 + MN^2", 0.5, None, "By the Pythagorean Theorem, V N squared equals V M squared plus M N squared."),
-            (MathTex, f"VN^2 = ({vm_height})^2 + ({mn_base:.1f})^2", 0.5, None, f"Substituting the values, V N squared equals {vm_height} squared plus {mn_base:.1f} squared."),
-            (MathTex, f"VN^2 = {vm_height**2} + {mn_base**2:.2f}", 0.5, None, f"Calculating the squares, we get {vm_height**2} plus {mn_base**2:.2f}."),
-            (MathTex, f"VN^2 = {vn_hyp_sq:.2f}", 0.5, None, f"So, V N squared equals {vn_hyp_sq:.2f}."),
-            (MathTex, f"VN = \\sqrt{{ {vn_hyp_sq:.2f} }} \\approx {vn_hyp:.2f}", 0.5, None, f"Taking the square root, V N is approximately {vn_hyp:.2f}."),
+            (MathTex, f"VN^2 = ({vm_height})^2 + ({int(mn_base) if mn_base.is_integer() else mn_base:.1f})^2", 0.5, None, f"Substituting the values, V N squared equals {vm_height} squared plus {int(mn_base) if mn_base.is_integer() else mn_base:.1f} squared."),
+            (MathTex, f"VN^2 = {vm_height**2} + {int(mn_base**2) if (mn_base**2).is_integer() else mn_base**2:.2f}", 0.5, None, f"Calculating the squares, we get {vm_height**2} plus {int(mn_base**2) if (mn_base**2).is_integer() else mn_base**2:.2f}."),
+            (MathTex, f"VN^2 = {int(vn_hyp_sq) if vn_hyp_sq.is_integer() else vn_hyp_sq:.2f}", 0.5, None, f"So, V N squared equals {int(vn_hyp_sq) if vn_hyp_sq.is_integer() else vn_hyp_sq:.2f}."),
+            (MathTex, f"VN = \\sqrt{{ {int(vn_hyp_sq) if vn_hyp_sq.is_integer() else vn_hyp_sq:.2f} }} \\approx {vn_hyp:.2f}", 0.5, None, f"Taking the square root, V N is approximately {vn_hyp:.2f}."),
             (Tex, f"Hypotenuse VN $\\approx$ {vn_hyp:.2f} cm", 0.8, GREEN, f"Therefore, the hypotenuse V N is approximately {vn_hyp:.2f} centimeters.")
         ]
 
@@ -139,5 +139,4 @@ class WorkedExamplePyramid(VoiceoverScene): # Changed base class to VoiceoverSce
 
         # Removed move_camera
         with self.voiceover(text="The calculation is complete.") as tracker:
-            self.wait(tracker.duration)
-        # self.wait(3) # Final pause 
+            self.wait(tracker.duration)        # self.wait(3) # Final pause
