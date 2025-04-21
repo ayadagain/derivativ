@@ -1,0 +1,4 @@
+# This file is used internally by FFMPEG.
+file 'file:/home/erniesg/code/erniesg/derivativ/manim_examples/media/videos/equation_animation/480p15/partial_movie_files/BasicEquation/1185035400_1561556331_223132457.mp4'
+file 'file:/home/erniesg/code/erniesg/derivativ/manim_examples/media/videos/equation_animation/480p15/partial_movie_files/BasicEquation/3080138954_4017364036_1168172367.mp4'
+file 'file:/home/erniesg/code/erniesg/derivativ/manim_examples/media/videos/equation_animation/480p15/partial_movie_files/BasicEquation/3080138954_2872842549_3231983886.mp4'
