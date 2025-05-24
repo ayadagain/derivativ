@@ -1,2 +1,7 @@
 .python-version
 *.pyc
+.venv
+media/*
+
+__pycache__
+.env
